@@ -1,2 +1,1 @@
-# Lesta Games Academy
-## Тестовое задание
+# Lesta Games Academy (тестовое задание)
