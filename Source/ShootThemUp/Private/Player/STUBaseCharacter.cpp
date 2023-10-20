@@ -11,6 +11,8 @@
 #include "GameFramework/Controller.h"
 #include "Components/STUWeaponComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/MovementComponent.h"
+#include <Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 
 // Создаем локальную категорию логирования для логирования дамага
@@ -56,6 +58,7 @@ ASTUBaseCharacter::ASTUBaseCharacter()
 
 	// Создаем компонент для оружия
 	WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>("WeaponComponent");
+
 }
 
 // Called when the game starts or when spawned
@@ -90,6 +93,29 @@ void ASTUBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	auto CurrentLocation = GetActorLocation();
+	if (CurrentLocation.X > 20066 - 1000 && CurrentLocation.X < 20066 + 1000 && CurrentLocation.Y > -2500 && CurrentLocation.Y < 2500)
+	{
+		// Finish
+		ULevel* CurrentLevel = GetWorld()->GetCurrentLevel();
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*(CurrentLevel->GetOuter()->GetName())), true);
+	}
+	
+
+	//auto Velocity = GetVelocity();
+	//UE_LOG(BaseCharacterLog, Warning, TEXT("Velocity: %fl"), Velocity.Size());
+
+	//GetCharacterMovement()->MaxWalkSpeed = 300.f;
+
+	// Для ветра!!!
+	/*
+	auto Location = GetActorLocation();
+	Location.X -= 5.0f;
+	SetActorLocation(Location);
+	*/
+	
+
 	// Каждый фрейм передаем компоненту HealthTextComponent значение переменной Health
 	//const auto Health = HealthComponent->GetHealth();
 	//HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
@@ -121,8 +147,8 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// Биндим прыжок:
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
 	// Биндим ускорение:
-	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
-	PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
+	//PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
+	//PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
 
 	// Биндим стрельбу
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
@@ -216,6 +242,12 @@ void ASTUBaseCharacter::OnDeath()
 	// При смерти отключаем колизии с капсулой персонажа
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
+
+	// Restart the current level
+	ULevel* CurrentLevel = GetWorld()->GetCurrentLevel();
+	UGameplayStatics::OpenLevel(GetWorld(), FName(*(CurrentLevel->GetOuter()->GetName())), true);
+	//
+	
 }
 
 void ASTUBaseCharacter::OnHealthChanged(float Health)
@@ -229,6 +261,15 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 	// Будем наносить персонажу урон при падении, который будет пропорционален скорости падения
 	const auto FallVelocityZ = -GetCharacterMovement()->Velocity.Z;
 	UE_LOG(BaseCharacterLog, Display, TEXT("On landed: %f"), FallVelocityZ);
+
+
+	if (FallVelocityZ < 3000 && FallVelocityZ > 2000)
+	{
+		TakeDamage(100.0f, FDamageEvent{}, nullptr, nullptr);
+		return;
+	}
+
+	if (FallVelocityZ > 3000) { return; }
 
 	// Проверяем, что скорость не меньше 900
 	if (FallVelocityZ < LandedDamageVelocity.X) { return; }

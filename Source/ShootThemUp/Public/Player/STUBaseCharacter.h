@@ -58,7 +58,9 @@ protected:
 
 	// ѕредельна€ скорость, при которой урон от падени€ будет наноситьс€
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	FVector2D LandedDamageVelocity = FVector2D(900.0f, 1200.0f);
+	FVector2D LandedDamageVelocity = FVector2D(2000.0f, 3000.0f);
+	//FVector2D LandedDamageVelocity = FVector2D(900.0f, 1200.0f);
+	
 
 	// Ќаносимый урон при падении (при скорости падени€ 900 урон будет 10, а при скорости 1200 - урон будет 100)
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
@@ -116,6 +118,8 @@ private:
 	// FHitResult - спец. структура в UE, в которой содержитс€ информаци€ о контакте двух объектов
 	UFUNCTION()
 	void OnGroundLanded(const FHitResult& Hit);
+
+	
 
 	
 
